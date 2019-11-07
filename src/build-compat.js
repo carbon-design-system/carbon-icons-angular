@@ -5,7 +5,8 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-const icons = require('@carbon/icons/build-info.json');
+// const icons = require('@carbon/icons/build-info.json');
+const icons = require('./build-info.json');
 const { toString } = require('@carbon/icon-helpers');
 const { reporter } = require('@carbon/cli-reporter');
 const fs = require('fs-extra');
