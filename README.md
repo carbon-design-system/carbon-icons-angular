@@ -1,5 +1,7 @@
 # @carbon/icons-angular
 
+[![Build Status](https://www.travis-ci.org/carbon-design-system/carbon-icons-angular.svg?branch=master)](https://www.travis-ci.org/carbon-design-system/carbon-icons-angular)
+
 > Angular components for icons in digital and software products using the Carbon
 > Design System
 
@@ -29,6 +31,36 @@ your project by doing the following:
 In your module:
 
 ```ts
+import { AddModule } from '@carbon/icons-angular';
+
+@NgModule({
+  // ...
+  imports: [
+    // ...
+    AddModule,
+    // ...
+  ],
+  // ...
+})
+export class MyModule {}
+```
+
+In your component template:
+
+```html
+<!-- ... -->
+<!-- the directive should be preferd whenever possible -->
+<svg ibmIconAdd size="32"></svg>
+<!-- but a component is also available -->
+<ibm-icon-add size="32"></ibm-icon-add>
+<!-- ... -->
+```
+
+### Legacy usage notes
+
+In your module:
+
+```ts
 import { Add32Module } from '@carbon/icons-angular/lib/add/32.js';
 
 @NgModule({
@@ -50,13 +82,26 @@ In your component template:
 
 ```html
 <!-- ... -->
+<svg ibmIconAdd32></svg>
+<!-- or -->
 <ibm-icon-add32></ibm-icon-add32>
 <!-- ... -->
 ```
 
 ### API
 
-Options availiable to all icon components:
+Options available to the icon directive or component:
+
+[#](#size) **`@Input() size: string;`**
+
+Choses the size of the component. **Note:** not available for icons specified by direct path
+
+Example:
+
+```html
+<ibm-icon-add size="16"></ibm-icon-add>
+```
+
 
 [#](#innerClass) **`@Input() innerClass: string;`**
 
@@ -66,15 +111,15 @@ apply classes to the host element.
 Example:
 
 ```html
-<ibm-icon-add16 innerClass="inner-class" class="host-class"></ibm-icon-add16>
+<ibm-icon-add size="16" innerClass="inner-class" class="host-class"></ibm-icon-add>
 ```
 
 would result in
 
 ```html
-<ibm-icon-add16 class="host-class">
+<ibm-icon-add size="16" class="host-class">
   <svg class="inner-class"><!-- ... --></svg>
-</ibm-icon-add16>
+</ibm-icon-add>
 ```
 
 [#](#ariaLabel) **`@Input() ariaLabel: string;`**
@@ -84,7 +129,7 @@ If supplied, should provide an accessible description of the icon.
 Example:
 
 ```html
-<ibm-icon-add16 ariaLabel="Add a new item"></ibm-icon-add16>
+<ibm-icon-add size="16" ariaLabel="Add a new item"></ibm-icon-add>
 ```
 
 [#](#ariaLabelledby) **`@Input() ariaLabelledby: string;`**
@@ -96,7 +141,7 @@ Example:
 
 ```html
 <label id="itemAddLabel">Add a new item</label>
-<ibm-icon-add16 ariaLabelledby="itemAddLabel"></ibm-icon-add16>
+<ibm-icon-add size="16" ariaLabelledby="itemAddLabel"></ibm-icon-add>
 ```
 
 [#](#ariaHidden) **`@Input() ariaHidden: boolean;`**
@@ -106,7 +151,7 @@ Controls the visibility of the underlying SVG to screen readers.
 Example:
 
 ```html
-<ibm-icon-add16 ariaHidden="true"></ibm-icon-add16>
+<ibm-icon-add size="16" ariaHidden="true"></ibm-icon-add>
 ```
 
 [#](#title) **`@Input() title: string;`**
@@ -117,7 +162,7 @@ as a tooltip when the icon is hovered.
 Example:
 
 ```html
-<ibm-icon-add16 title="Add a new item"></ibm-icon-add16>
+<ibm-icon-add size="16" title="Add a new item"></ibm-icon-add>
 ```
 
 [#](#focusable) **`@Input() focusable: boolean;`**
@@ -129,7 +174,7 @@ cases.
 Example:
 
 ```html
-<ibm-icon-add16 focusable="false"></ibm-icon-add16>
+<ibm-icon-add size="16" focusable="false"></ibm-icon-add>
 ```
 
 ## 🙌 Contributing

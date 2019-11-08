@@ -1,0 +1,13 @@
+dist: trusty
+language: node_js
+node_js:
+  - "12"
+script: "yarn build"
+deploy:
+  provider: script
+  script: "bash ./scripts/deploy.sh"
+  skip_cleanup: true
+  on:
+    all_branches: true
+notifications:
+  email: false
