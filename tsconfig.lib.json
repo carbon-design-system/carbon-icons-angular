@@ -1,7 +1,3 @@
 {
-  "extends": "<root>/node_modules/ng-packagr/lib/ts/conf/tsconfig.ngc.json",
-  "compilerOptions": {
-    "sourceMap": false,
-    "inlineSources": false
-  }
+  "extends": "<root>/node_modules/ng-packagr/lib/ts/conf/tsconfig.ngc.json"
 }
