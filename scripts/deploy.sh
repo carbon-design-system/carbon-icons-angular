@@ -8,4 +8,4 @@ if [[ ${TRAVIS_TEST_RESULT=0} == 1 ]]; then
 fi
 
 #deploy with semantic-release
-npm run semantic-release > /dev/null
+npm run semantic-release
