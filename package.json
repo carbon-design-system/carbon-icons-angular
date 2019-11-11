@@ -14,6 +14,7 @@
     ]
   },
   "release": {
+    "pkgRoot": "dist",
     "branch": "master"
   },
   "repository": "https://github.com/carbon-design-system/carbon-icons-angular",
