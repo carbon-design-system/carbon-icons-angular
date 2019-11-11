@@ -6,3 +6,6 @@ set -e # exit with nonzero exit code if anything fails
 if [[ ${TRAVIS_TEST_RESULT=0} == 1 ]]; then
   exit 1;
 fi
+
+#deploy with semantic-release
+npm run semantic-release
