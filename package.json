@@ -33,7 +33,8 @@
     "directory": "dist"
   },
   "scripts": {
-    "build": "yarn build:full",
+    "build": "yarn build:tmp",
+    "build:tmp": "yarn clean && yarn build:generate && yarn build:compat",
     "build:full": "yarn clean && yarn build:generate && yarn build:ivy && yarn build:compat",
     "build:local": "yarn clean && yarn build:generate && yarn build:ivy",
     "build:ivy": "node --max_old_space_size=3512 ./node_modules/.bin/ng-packagr -p package.json",
