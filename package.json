@@ -42,7 +42,8 @@
     "build:generate": "node tasks/generate.js",
     "clean": "node tasks/clean.js",
     "semantic-release": "semantic-release",
-    "prepub": "cp README.md package.json ./dist"
+    "prepub": "cp README.md package.json ./dist",
+    "test": "bash scripts/run-integration-test.sh"
   },
   "peerDependencies": {
     "@angular/compiler": "^6.0.0 || ^7.0.0 || ^8.0.0",

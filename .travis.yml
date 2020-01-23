@@ -2,7 +2,9 @@ dist: trusty
 language: node_js
 node_js:
   - "12"
-script: "yarn build"
+script:
+  - yarn build
+  - yarn test
 deploy:
   provider: script
   script: "bash ./scripts/deploy.sh"
