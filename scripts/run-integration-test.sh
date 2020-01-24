@@ -10,5 +10,8 @@ npm i
 echo "copying compiled icons"
 cp -R ../../dist/ node_modules/@carbon/icons-angular/
 
+echo "testing"
+npm run test
+
 echo "building"
 npm run build
