@@ -40,6 +40,7 @@
     "build:ivy": "node --max_old_space_size=3512 ./node_modules/.bin/ng-packagr -p package.json",
     "build:compat": "node --max_old_space_size=3512 tasks/build-compat.js",
     "build:generate": "node tasks/generate.js",
+    "build:storybook": "cd examples/storybook && yarn && yarn build",
     "clean": "node tasks/clean.js",
     "semantic-release": "semantic-release",
     "prepub": "cp README.md package.json ./dist",
