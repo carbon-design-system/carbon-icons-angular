@@ -30,7 +30,7 @@
         "range": "10.X"
       }
     ],
-    "tagFormat": "v${version}@latest"
+    "tagFormat": "v${version}@next"
   },
   "repository": "https://github.com/carbon-design-system/carbon-icons-angular",
   "bugs": "https://github.com/carbon-design-system/carbon-icons-angular/issues",
