@@ -69,7 +69,7 @@
     "@angular/compiler-cli": "7.2.15",
     "@angular/core": "7.2.15",
     "@carbon/cli-reporter": "10.3.0",
-    "@carbon/icons": "10.9.1",
+    "@carbon/icons": "10.8.2",
     "change-case": "3.0.2",
     "fs-extra": "7.0.1",
     "ng-packagr": "5.7.1",
