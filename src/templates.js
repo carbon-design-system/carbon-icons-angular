@@ -77,13 +77,13 @@ export class ${classCase(
     const svg = this.elementRef.nativeElement;
     svg.setAttribute("xmlns", "http://www.w3.org/2000/svg");
 
-    const icon = this.icons[this.size];
+    const icon = this.icons[this.size]
 
     const domParser = new DOMParser();
     const rawSVG = icon.svg;
     const svgElement = domParser.parseFromString(rawSVG, "image/svg+xml").documentElement;
 
-    let node = svgElement.firstChild as any;
+    let node = svgElement.firstChild;
     while (node) {
       // importNode makes a clone of the node
       // this ensures we keep looping over the nodes in the parsed document
@@ -163,14 +163,22 @@ export class ${classCase(namespace)}Module {}
 
 const rootPublicApi = namespaces =>
   namespaces.reduce(
-    (str, name) => `
-  ${str}
-  export * from "./${name}";
-`,
-    ''
-  );
+    (str, name) => `${str}
+export * from "./${name}";`,'');
+
+const tsRootPublicApi = namespaces =>
+  namespaces.reduce(
+    (str, name) => `${str}
+export * from "./${name}";`, '');
+
+const jsRootPublicApi = namespaces =>
+  namespaces.reduce(
+    (str, name) => `${str}
+export * from "./${name}";`, '');
 
 module.exports = {
   moduleTemplate,
   rootPublicApi,
+  tsRootPublicApi,
+  jsRootPublicApi
 };

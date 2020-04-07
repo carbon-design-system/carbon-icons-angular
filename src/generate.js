@@ -10,6 +10,12 @@ const { reporter } = require('@carbon/cli-reporter');
 const fs = require('fs-extra');
 const { dirname } = require('path');
 
+const { createEmitCallback } = require('ng-packagr/lib/ngc/create-emit-callback');
+
+const ts = require('typescript');
+const ng = require('@angular/compiler-cli');
+const rollup = require('rollup');
+
 const { moduleTemplate, rootPublicApi } = require('./templates');
 
 // local utilities
@@ -51,17 +57,103 @@ const reformatIcons = () => {
   return iconMap;
 };
 
+function emitModule(namespace, scriptTarget) {
+  const baseFilePath = '';
+  const sourceFile = '';
+  const moduleType = '';
+
+  const options = {
+    fileName: 'icon.ts',
+    scriptTarget
+  };
+
+  ngCompile(options)
+}
+
+function ngCompile(options) {
+
+  const config = ng.readConfiguration(`${__dirname}/tsconfig.json`, {
+
+  });
+
+  const tsHost = ts.createCompilerHost(config.options);
+
+  const ngHost = ng.createCompilerHost({
+    options: config.options,
+    tsHost
+  });
+
+  const program = ng.createProgram({
+    host: ngHost,
+    oldProgram: null,
+    options: config.options
+  });
+
+  const result = program.emit({
+    emitFlags: ng.EmitFlags.JS,
+    emitCallback: createEmitCallback(config.options)
+  });
+}
+
+function writeMegaBundle() {
+  const formats = ["fesm5", "fesm2015", "bundles"];
+  const bundles = [];
+
+  const bundle = rollup.rollup();
+}
+
+async function writeMetadata() {
+  const packageJson = require('../package.json');
+
+  packageJson.esm5 = '';
+  packageJson.esm2015 = '';
+  packageJson.fesm5 = '';
+  packageJson.fesm2015 = '';
+  packageJson.bundles = '';
+  packageJson.main = '';
+  packageJson.module = '';
+  packageJson.typings = './index.d.ts';
+  packageJson.metadata = './index.metadata.json';
+
+  await fs.writeFile(packageJson);
+
+  const metadataJson = {
+    exports: []
+  };
+
+  const iconMap = reformatIcons();
+
+  for (const [namespace, icons] of iconMap) {
+    metadataJson.exports.push({
+      from: `./${namespace}`
+    });
+  }
+
+  await fs.writeFile('index.metadata.json', JSON.stringify(metadataJson));
+}
+
+async function writeIndexes() {
+  await Promise.all([
+    fs.writeFile('dist/index.d.ts', rootPublicApi(namespaces)),
+    fs.writeFile('dist/esm5/index.js', rootPublicApi(namespaces)),
+    fs.writeFile('dist/esm2015/index.js', rootPublicApi(namespaces)),
+    fs.writeFile('dist/fesm5/index.js', rootPublicApi(namespaces)),
+    fs.writeFile('dist/fesm2015/index.js', rootPublicApi(namespaces))
+  ]);
+}
+
 async function generateComponents(iconMap) {
   for (const [namespace, icons] of iconMap) {
     await fs.ensureDir(`ts/${namespace}`);
 
     const moduleString = moduleTemplate(namespace, icons);
-    await fs.writeFile(`ts/${namespace}/index.ts`, moduleString);
+    await fs.writeFile(`ts/${namespace}/icon.ts`, moduleString);
   }
 
   // get all the namespaces to build the import definitions
   const namespaces = Array.from(iconMap.keys());
   await fs.writeFile('ts/index.ts', rootPublicApi(namespaces));
+  return Array.from(iconMap);
 }
 
 async function generate() {
@@ -76,7 +168,13 @@ async function generate() {
   const iconMap = reformatIcons();
 
   reporter.log('Generating source components...');
+  await writeIndexes(iconMap);
   await generateComponents(iconMap);
 }
 
-module.exports = generate;
+module.exports = {
+  generate,
+  writeMegaBundle,
+  writeMetadata,
+  emitModule
+};
