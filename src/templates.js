@@ -164,7 +164,7 @@ export class ${classCase(namespace)}Module {}
 const rootPublicApi = namespaces =>
   namespaces.reduce(
     (str, name) => `${str}
-export * from "./${name}";`,'');
+export * from "./${name}/icon";`,'');
 
 const tsRootPublicApi = namespaces =>
   namespaces.reduce(

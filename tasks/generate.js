@@ -21,7 +21,7 @@ if (cluster.isMaster) {
   console.log(`Master ${process.pid} is running`);
 
   // Fork workers.
-  for (let i = 0; i < numCPUs; i++) {
+  for (let i = 0; i < 1; i++) {
     cluster.fork();
   }
 
@@ -84,8 +84,11 @@ if (cluster.isMaster) {
   console.log(`Worker ${process.pid} started`);
   process.on('message', ({namespace}) => {
     console.log(`Worker ${process.pid} building ${namespace}`);
+    console.log("es2015")
     emitModule(namespace, ts.ScriptTarget.ES2015);//es2015
+    console.log("es5")
     emitModule(namespace, ts.ScriptTarget.ES5);
+    console.log("bundle");
     writeBundles(namespace).then(() =>{
       process.send({ state: 'done' });
     }).catch(() => {
