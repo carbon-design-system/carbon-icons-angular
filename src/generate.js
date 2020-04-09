@@ -31,7 +31,6 @@ const paths = require('./paths');
 
 const reformatIcons = () => {
   let iconMap = new Map();
-  let count = 0;
   for (const icon of icons) {
     /**
      * index.js is generally the implied default import for a path
@@ -61,10 +60,6 @@ const reformatIcons = () => {
       iconMap.get(icon.namespace).push(icon);
     } else {
       iconMap.set(icon.namespace, [icon]);
-    }
-    count ++;
-    if (count > 1) {
-      break;
     }
   }
   return iconMap;

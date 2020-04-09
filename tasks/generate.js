@@ -21,7 +21,7 @@ if (cluster.isMaster) {
   console.log(`Master ${process.pid} is running`);
 
   // Fork workers.
-  for (let i = 0; i < 1; i++) {
+  for (let i = 0; i < numCPUs; i++) {
     cluster.fork();
   }
 
@@ -41,7 +41,7 @@ if (cluster.isMaster) {
           console.log(`${iconArray.length - lastIcon} icons left`);
         } else if (lastIcon >= iconArray.length) {
           finishedWorkers++;
-          if (finishedWorkers === 1) {
+          if (finishedWorkers === numCPUs) {
             resolve();
           }
         } else if (state === 'error') {
