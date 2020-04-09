@@ -34,9 +34,11 @@ if (cluster.isMaster) {
     for (const id in cluster.workers) {
       const worker = cluster.workers[id];
 
+      worker.send({ state: 'ready' });
+
       worker.on('message', ({ state }) => {
         if ((state === 'done' || state === 'waiting') && lastIcon < iconArray.length) {
-          worker.send({ namespace: iconArray[lastIcon][0] });
+          worker.send({ state: 'build', namespace: iconArray[lastIcon][0] });
           lastIcon++;
           console.log(`${iconArray.length - lastIcon} icons left`);
         } else if (lastIcon >= iconArray.length) {
@@ -82,16 +84,20 @@ if (cluster.isMaster) {
   });
 } else {
   console.log(`Worker ${process.pid} started`);
-  process.on('message', ({namespace}) => {
-    console.log(`Worker ${process.pid} building ${namespace}`);
-    emitModule(namespace, ts.ScriptTarget.ES2015);//es2015
-    emitModule(namespace, ts.ScriptTarget.ES5);
-    writeBundles(namespace).then(() =>{
-      process.send({ state: 'done' });
-    }).catch((error) => {
-      console.error(error);
-      process.send({ state: 'error' });
-    });
+  process.on('message', ({ state, namespace }) => {
+    if (state === 'ready') {
+      console.log(`Worker ${process.pid} waiting...`);
+      process.send({ state: 'waiting' });
+    } else if (state === 'build') {
+      console.log(`Worker ${process.pid} building ${namespace}`);
+      emitModule(namespace, ts.ScriptTarget.ES2015);//es2015
+      emitModule(namespace, ts.ScriptTarget.ES5);
+      writeBundles(namespace).then(() =>{
+        process.send({ state: 'done' });
+      }).catch((error) => {
+        console.error(error);
+        process.send({ state: 'error' });
+      });
+    }
   });
-  process.send({ state: 'waiting' });
 }
