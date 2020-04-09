@@ -299,7 +299,7 @@ async function writeMetadata() {
     });
   }
 
-  await fs.writeFile('dist/package.json', packageJson);
+  await fs.writeFile('dist/package.json', JSON.stringify(packageJson));
   await fs.writeFile('dist/index.metadata.json', JSON.stringify(metadataJson));
 }
 

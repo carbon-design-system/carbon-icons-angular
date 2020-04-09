@@ -169,12 +169,12 @@ export * from "./${name}/icon";`,'');
 const tsRootPublicApi = namespaces =>
   namespaces.reduce(
     (str, name) => `${str}
-export * from "./${name.split('/').join('-')}";`, '');
+export * from "./${name}";`, '');
 
 const flatRootPublicApi = namespaces =>
   namespaces.reduce(
     (str, name) => `${str}
-export * from "./${name}";`, '');
+export * from "./${name.split('/').join('-')}";`, '');
 
 const jsRootPublicApi = namespaces =>
   namespaces.reduce(
