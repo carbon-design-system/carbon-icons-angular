@@ -16,8 +16,15 @@ const { downlevelConstructorParameters } = require('ng-packagr/lib/ts/ctor-param
 const ts = require('typescript');
 const ng = require('@angular/compiler-cli');
 const rollup = require('rollup');
+const { pascal } = require('change-case');
 
-const { moduleTemplate, rootPublicApi, jsRootPublicApi } = require('./templates');
+const {
+  moduleTemplate,
+  rootPublicApi,
+  tsRootPublicApi,
+  jsRootPublicApi,
+  flatRootPublicApi
+} = require('./templates');
 
 // local utilities
 const paths = require('./paths');
@@ -129,31 +136,23 @@ function ngCompile(options) {
   const config = ng.readConfiguration(`${__dirname}/tsconfig.json`, extraOptions);
 
   const overrideOptions = {
-    // flatModuleId: options.moduleId,
-    // flatModuleOutFile: 'index.js',
     basePath: options.sourcePath,
     rootDir: options.sourcePath,
     declarationDir: options.declarationPath,
   };
 
   config.options = { ...config.options, ...overrideOptions };
-
   config.rootNames = [options.sourceFile];
 
-  console.log(config);
-
-  console.log("ts host")
   // typescript compiler host, used by ngc
   const tsHost = ts.createCompilerHost(config.options, true);
 
-  console.log("ngc host")
   // ngc compiler host
   const ngHost = ng.createCompilerHost({
     options: config.options,
     tsHost
   });
 
-  console.log("program");
   // create the program (typecheck, etc)
   const program = ng.createProgram({
     rootNames: config.rootNames,
@@ -161,7 +160,6 @@ function ngCompile(options) {
     host: ngHost
   });
 
-  console.log("diag");
   // collect all diagnostic messages
   const diagMessages = [
     ...program.getTsOptionDiagnostics(),
@@ -177,10 +175,8 @@ function ngCompile(options) {
     beforeTs.push(downlevelConstructorParameters(() => program.getTsProgram().getTypeChecker()));
   }
 
-  console.log("maybe emit?")
   // don't emit if the program won't compile
   if (ng.exitCodeFromResult(diagMessages) === 0) {
-    console.log("do emit");
     const emitFlags = config.options.declaration ? config.emitFlags : ng.EmitFlags.JS;
     const result = program.emit({
       emitFlags,
@@ -189,8 +185,7 @@ function ngCompile(options) {
         beforeTs
       }
     });
-
-    diagMessages.push(result.diagnostics);
+    diagMessages.push(...result.diagnostics);
   }
 
   // everything went well, no need to log anything
@@ -208,11 +203,76 @@ function ngCompile(options) {
   }
 }
 
-function writeMegaBundle() {
-  const formats = ["fesm5", "fesm2015", "bundles"];
+const getRollupInputOptions = ({sourceType, namespace}) => ({
+  external: [
+    '@angular/core',
+    '@carbon/icon-helpers'
+  ],
+  input: `dist/${sourceType}/${namespace ? namespace : ''}/index.js`,
+  onwarn(warning) {
+    if (warning.code === 'UNUSED_EXTERNAL_IMPORT') {
+      return;
+    }
+  }
+});
+
+const getRollupOutputOptions = ({file, format, name}) => ({
+  file,
+  format,
+  globals: {
+    '@angular/core': 'ng.core',
+    '@carbon/icon-helpers': 'CarbonIconHelpers'
+  },
+  name
+});
+
+async function writeMegaBundle() {
+  const inputOptions = getRollupInputOptions({
+    sourceType: 'esm5'
+  });
+
+  const outputOptions = getRollupOutputOptions({
+    file: 'dist/bundles/carbon-icons-angular.umd.js',
+    format: 'umd',
+    name: 'CarbonIconsAngular'
+  });
+
+  const bundle = await rollup.rollup(inputOptions);
+  return bundle.write(outputOptions);
+}
+
+async function writeBundles(namespace) {
+  const formats = ['esm5', 'esm2015', 'bundles'];
   const bundles = [];
 
-  const bundle = rollup.rollup();
+  for (const format of formats) {
+    const inputOptions = getRollupInputOptions({
+      sourceType: format === 'bundles' ? 'esm5' : format,
+      namespace
+    });
+
+    let outputOptions = {};
+
+    if (format === 'bundles') {
+      outputOptions = getRollupOutputOptions({
+        file: `dist/bundles/${namespace.split('/').join('-')}.umd.js`,
+        format: 'umd',
+        name: `CarbonIconsAngular.${pascal(namespace)}`
+      });
+    } else {
+      outputOptions = getRollupOutputOptions({
+        file: `dist/f${format}/${namespace.split('/').join('-')}.js`,
+        format: 'es',
+        name: `CarbonIconsAngular.${pascal(namespace)}`
+      });
+    }
+
+
+    const bundle = await rollup.rollup(inputOptions);
+    bundles.push(bundle.write(outputOptions));
+  }
+
+  return Promise.all(bundles);
 }
 
 async function writeMetadata() {
@@ -228,10 +288,12 @@ async function writeMetadata() {
   packageJson.typings = './index.d.ts';
   packageJson.metadata = './index.metadata.json';
 
-  await fs.writeFile(packageJson);
-
   const metadataJson = {
-    exports: []
+    __symbolic: 'module',
+    version: 4,
+    metadata: {},
+    exports: [],
+    importAs: '@carbon/icons-angular'
   };
 
   const iconMap = reformatIcons();
@@ -242,17 +304,18 @@ async function writeMetadata() {
     });
   }
 
-  await fs.writeFile('index.metadata.json', JSON.stringify(metadataJson));
+  await fs.writeFile('dist/package.json', packageJson);
+  await fs.writeFile('dist/index.metadata.json', JSON.stringify(metadataJson));
 }
 
 async function writeIndexes(iconMap) {
   const namespaces = Array.from(iconMap.keys());
   await Promise.all([
-    fs.writeFile('dist/index.d.ts', rootPublicApi(namespaces)),
+    fs.writeFile('dist/index.d.ts', tsRootPublicApi(namespaces)),
     fs.writeFile('dist/esm5/index.js', jsRootPublicApi(namespaces)),
     fs.writeFile('dist/esm2015/index.js', jsRootPublicApi(namespaces)),
-    fs.writeFile('dist/fesm5/index.js', rootPublicApi(namespaces)),
-    fs.writeFile('dist/fesm2015/index.js', rootPublicApi(namespaces))
+    fs.writeFile('dist/fesm5/index.js', flatRootPublicApi(namespaces)),
+    fs.writeFile('dist/fesm2015/index.js', flatRootPublicApi(namespaces))
   ]);
 }
 
@@ -298,5 +361,6 @@ module.exports = {
   generate,
   writeMegaBundle,
   writeMetadata,
-  emitModule
+  emitModule,
+  writeBundles
 };

@@ -41,7 +41,7 @@ if (cluster.isMaster) {
           console.log(`${iconArray.length - lastIcon} icons left`);
         } else if (lastIcon >= iconArray.length) {
           finishedWorkers++;
-          if (finishedWorkers === numCPUs) {
+          if (finishedWorkers === 1) {
             resolve();
           }
         } else if (state === 'error') {
@@ -60,7 +60,7 @@ if (cluster.isMaster) {
   })
   .then(() => {
     console.log('writing the megabundle');
-    writeMegaBundle()
+    return writeMegaBundle()
   })
   .then(() => {
     console.log('writing metadata');
@@ -84,14 +84,12 @@ if (cluster.isMaster) {
   console.log(`Worker ${process.pid} started`);
   process.on('message', ({namespace}) => {
     console.log(`Worker ${process.pid} building ${namespace}`);
-    console.log("es2015")
     emitModule(namespace, ts.ScriptTarget.ES2015);//es2015
-    console.log("es5")
     emitModule(namespace, ts.ScriptTarget.ES5);
-    console.log("bundle");
     writeBundles(namespace).then(() =>{
       process.send({ state: 'done' });
-    }).catch(() => {
+    }).catch((error) => {
+      console.error(error);
       process.send({ state: 'error' });
     });
   });

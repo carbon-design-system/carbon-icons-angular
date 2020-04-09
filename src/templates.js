@@ -169,16 +169,22 @@ export * from "./${name}/icon";`,'');
 const tsRootPublicApi = namespaces =>
   namespaces.reduce(
     (str, name) => `${str}
+export * from "./${name.split('/').join('-')}";`, '');
+
+const flatRootPublicApi = namespaces =>
+  namespaces.reduce(
+    (str, name) => `${str}
 export * from "./${name}";`, '');
 
 const jsRootPublicApi = namespaces =>
   namespaces.reduce(
     (str, name) => `${str}
-export * from "./${name}";`, '');
+export * from "./${name}/index";`, '');
 
 module.exports = {
   moduleTemplate,
   rootPublicApi,
   tsRootPublicApi,
-  jsRootPublicApi
+  jsRootPublicApi,
+  flatRootPublicApi
 };
