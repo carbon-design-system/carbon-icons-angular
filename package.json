@@ -26,11 +26,11 @@
       },
       {
         "name": "v10",
-        "channel": "v10",
+        "channel": "carbon-v10",
         "range": "10.X"
       }
     ],
-    "tagFormat": "v${version}@next"
+    "tagFormat": "v${version}@latest"
   },
   "repository": "https://github.com/carbon-design-system/carbon-icons-angular",
   "bugs": "https://github.com/carbon-design-system/carbon-icons-angular/issues",
