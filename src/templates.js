@@ -163,14 +163,28 @@ export class ${classCase(namespace)}Module {}
 
 const rootPublicApi = namespaces =>
   namespaces.reduce(
-    (str, name) => `
-  ${str}
-  export * from "./${name}";
-`,
-    ''
-  );
+    (str, name) => `${str}
+export * from "./${name}/icon";`,'');
+
+const tsRootPublicApi = namespaces =>
+  namespaces.reduce(
+    (str, name) => `${str}
+export * from "./${name}";`, '');
+
+const flatRootPublicApi = namespaces =>
+  namespaces.reduce(
+    (str, name) => `${str}
+export * from "./${name.split('/').join('-')}";`, '');
+
+const jsRootPublicApi = namespaces =>
+  namespaces.reduce(
+    (str, name) => `${str}
+export * from "./${name}/index";`, '');
 
 module.exports = {
   moduleTemplate,
   rootPublicApi,
+  tsRootPublicApi,
+  jsRootPublicApi,
+  flatRootPublicApi
 };
