@@ -56,9 +56,9 @@ In your component template:
 <!-- ... -->
 ```
 
-### Legacy usage notes
+### Migration notes
 
-In your module:
+Previously (all `v10` versions) a pattern like the following was required
 
 ```ts
 import { Add32Module } from '@carbon/icons-angular/lib/add/32.js';
@@ -74,19 +74,7 @@ import { Add32Module } from '@carbon/icons-angular/lib/add/32.js';
 })
 export class MyModule {}
 ```
-
-_Note: if you would like to find the import path for an icon, you can reference
-our [icon preview](https://carbon-elements.netlify.com/icons/examples/preview/)_
-
-In your component template:
-
-```html
-<!-- ... -->
-<svg ibmIconAdd32></svg>
-<!-- or -->
-<ibm-icon-add32></ibm-icon-add32>
-<!-- ... -->
-```
+This is no longer supported. All icon module imports must switch to the format outlined above.
 
 ### API
 
@@ -94,7 +82,7 @@ Options available to the icon directive or component:
 
 [#](#size) **`@Input() size: string;`**
 
-Choses the size of the component. **Note:** not available for icons specified by direct path
+Choses the size of the component.
 
 Example:
 
