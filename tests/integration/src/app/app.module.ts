@@ -1,9 +1,7 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 
-import { _4K16Module } from '@carbon/icons-angular/lib/4K/16';
-import { QCircuitComposer16Module } from '@carbon/icons-angular/lib/Q/circuit-composer/16';
-import { WatsonHealth3DCursor16Module } from '@carbon/icons-angular/lib/watson-health/3D-Cursor/16';
+import { _4KModule, QCircuitComposerModule, WatsonHealth_3DCursorModule } from '@carbon/icons-angular';
 
 import { AppComponent } from './app.component';
 
@@ -13,9 +11,9 @@ import { AppComponent } from './app.component';
   ],
   imports: [
     BrowserModule,
-    _4K16Module,
-    QCircuitComposer16Module,
-    WatsonHealth3DCursor16Module
+    _4KModule,
+    QCircuitComposerModule,
+    WatsonHealth_3DCursorModule
   ],
   providers: [],
   bootstrap: [AppComponent]
