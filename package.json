@@ -15,7 +15,22 @@
   },
   "release": {
     "pkgRoot": "dist",
-    "branch": "master"
+    "branches": [
+      {
+        "name": "master",
+        "channel": "latest"
+      },
+      {
+        "name": "next",
+        "channel": "next"
+      },
+      {
+        "name": "v10",
+        "channel": "carbon-v10",
+        "range": "10.X"
+      }
+    ],
+    "tagFormat": "v${version}@v10"
   },
   "repository": "https://github.com/carbon-design-system/carbon-icons-angular",
   "bugs": "https://github.com/carbon-design-system/carbon-icons-angular/issues",
@@ -61,8 +76,8 @@
     "@carbon/icons": "10.8.1",
     "change-case": "3.0.2",
     "fs-extra": "7.0.1",
-    "ng-packagr": "^5.5.1",
-    "semantic-release": "^15.13.30",
+    "ng-packagr": "5.5.1",
+    "semantic-release": "17.0.4",
     "typescript": "2.9.2",
     "zone.js": "0.10.2"
   },
