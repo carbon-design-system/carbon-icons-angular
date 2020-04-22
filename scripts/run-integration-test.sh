@@ -7,9 +7,6 @@ cd tests/integration
 echo "installing dependencies"
 npm i
 
-echo "copying compiled icons"
-cp -R ../../dist/ node_modules/@carbon/icons-angular/
-
 echo "testing"
 npm run test
 
