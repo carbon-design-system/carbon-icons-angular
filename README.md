@@ -31,7 +31,7 @@ your project by doing the following:
 In your module:
 
 ```ts
-import { AddModule } from '@carbon/icons-angular';
+import { AddModule } from '@carbon/icons-angular/add';
 
 @NgModule({
   // ...
@@ -44,6 +44,8 @@ import { AddModule } from '@carbon/icons-angular';
 })
 export class MyModule {}
 ```
+
+**Note:** It is possible to import icons directly from the package root - `import { AddModule } from '@carbon/icons-angular';` - however, this is discouraged as it can lead to increased build times or Out-Of-Memory errors during compilation.
 
 In your component template:
 
