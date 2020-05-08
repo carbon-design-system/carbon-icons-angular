@@ -2,9 +2,7 @@ import { TestBed, async } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { AppComponent } from './app.component';
 
-import { _4K16Module } from '@carbon/icons-angular/lib/4K/16';
-import { QCircuitComposer16Module } from '@carbon/icons-angular/lib/Q/circuit-composer/16';
-import { WatsonHealth3DCursor16Module } from '@carbon/icons-angular/lib/watson-health/3D-Cursor/16';
+import { _4KModule, QCircuitComposerModule, WatsonHealth_3DCursorModule } from '@carbon/icons-angular';
 
 describe('AppComponent', () => {
   beforeEach(async(() => {
@@ -13,9 +11,9 @@ describe('AppComponent', () => {
         AppComponent
       ],
       imports: [
-        _4K16Module,
-        QCircuitComposer16Module,
-        WatsonHealth3DCursor16Module
+        _4KModule,
+        QCircuitComposerModule,
+        WatsonHealth_3DCursorModule
       ]
     }).compileComponents();
   }));
@@ -28,19 +26,19 @@ describe('AppComponent', () => {
 
   it(`should have a standard icon`, () => {
     const fixture = TestBed.createComponent(AppComponent);
-    const icon = fixture.debugElement.query(By.css('ibm-icon-4-k16'));
+    const icon = fixture.debugElement.query(By.css('ibm-icon-4-k'));
     expect(icon.nativeElement.firstElementChild.tagName).toEqual('svg');
   });
 
   it(`should have a ibm q icon`, () => {
     const fixture = TestBed.createComponent(AppComponent);
-    const icon = fixture.debugElement.query(By.css('ibm-icon-q-circuit-composer16'));
+    const icon = fixture.debugElement.query(By.css('ibm-icon-q-circuit-composer'));
     expect(icon.nativeElement.firstElementChild.tagName).toEqual('svg');
   });
 
   it(`should have a watson health icon`, () => {
     const fixture = TestBed.createComponent(AppComponent);
-    const icon = fixture.debugElement.query(By.css('ibm-icon-watson-health3-d-cursor16'));
+    const icon = fixture.debugElement.query(By.css('ibm-icon-watson-health-3-d-cursor'));
     expect(icon.nativeElement.firstElementChild.tagName).toEqual('svg');
   });
 });

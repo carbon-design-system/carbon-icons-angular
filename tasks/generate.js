@@ -10,7 +10,8 @@ const {
   emitModule,
   writeBundles,
   writeMetadata,
-  writeMegaBundle
+  writeMegaBundle,
+  writeIconMetadata
 } = require('../src/generate');
 const { reporter } = require('@carbon/cli-reporter');
 const cluster = require('cluster');
@@ -92,7 +93,10 @@ if (cluster.isMaster) {
       console.log(`Worker ${process.pid} building ${namespace}`);
       emitModule(namespace, ts.ScriptTarget.ES2015);//es2015
       emitModule(namespace, ts.ScriptTarget.ES5);
-      writeBundles(namespace).then(() =>{
+      Promise.all([
+        writeIconMetadata(namespace),
+        writeBundles(namespace)
+      ]).then(() =>{
         process.send({ state: 'done' });
       }).catch((error) => {
         console.error(error);
