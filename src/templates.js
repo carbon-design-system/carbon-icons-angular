@@ -188,10 +188,16 @@ const jsRootPublicApi = namespaces =>
     (str, name) => `${str}
 export * from "./${name}/index";`, '');
 
+const esRootPublicApi = namespaces =>
+  namespaces.reduce(
+    (str, name) => `${str}
+export * from "@carbon/icons-angular/${name}";`, '');
+
 module.exports = {
   moduleTemplate,
   rootPublicApi,
   dtsRootPublicApi,
   jsRootPublicApi,
-  flatRootPublicApi
+  flatRootPublicApi,
+  esRootPublicApi
 };

@@ -23,7 +23,8 @@ const {
   rootPublicApi,
   dtsRootPublicApi,
   jsRootPublicApi,
-  flatRootPublicApi
+  flatRootPublicApi,
+  esRootPublicApi
 } = require('./templates');
 
 // local utilities
@@ -32,6 +33,7 @@ const paths = require('./paths');
 const reformatIcons = () => {
   let iconMap = new Map();
   for (const carbonIcon of icons) {
+    // clone the icon before working on it
     const icon = JSON.parse(JSON.stringify(carbonIcon));
     /**
      * index.js is generally the implied default import for a path
@@ -262,9 +264,13 @@ const getRollupOutputOptions = ({file, format, name}) => ({
 });
 
 async function writeMegaBundle() {
+  const namespaces = Array.from(reformatIcons().keys());
+  await fs.writeFile('dist/esm5/bundle-tmp-index.js', jsRootPublicApi(namespaces));
   const inputOptions = getRollupInputOptions({
     sourceType: 'esm5'
   });
+
+  inputOptions.input = 'dist/esm5/bundle-tmp-index.js';
 
   const outputOptions = getRollupOutputOptions({
     file: 'dist/bundles/carbon-icons-angular.umd.js',
@@ -273,7 +279,8 @@ async function writeMegaBundle() {
   });
 
   const bundle = await rollup.rollup(inputOptions);
-  return bundle.write(outputOptions);
+  await bundle.write(outputOptions);
+  await fs.remove('dist/esm5/bundle-tmp-index.js');
 }
 
 async function writeBundles(namespace) {
@@ -369,8 +376,8 @@ async function writeIndexes(iconMap) {
   const namespaces = Array.from(iconMap.keys());
   await Promise.all([
     fs.writeFile('dist/index.d.ts', dtsRootPublicApi(namespaces)),
-    fs.writeFile('dist/esm5/index.js', jsRootPublicApi(namespaces)),
-    fs.writeFile('dist/esm2015/index.js', jsRootPublicApi(namespaces)),
+    fs.writeFile('dist/esm5/index.js', esRootPublicApi(namespaces)),
+    fs.writeFile('dist/esm2015/index.js', esRootPublicApi(namespaces)),
     fs.writeFile('dist/fesm5/index.js', flatRootPublicApi(namespaces)),
     fs.writeFile('dist/fesm2015/index.js', flatRootPublicApi(namespaces))
   ]);
