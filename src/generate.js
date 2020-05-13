@@ -31,7 +31,6 @@ const paths = require('./paths');
 
 const reformatIcons = () => {
   let iconMap = new Map();
-  // let i = 0;
   for (const carbonIcon of icons) {
     const icon = JSON.parse(JSON.stringify(carbonIcon));
     /**
@@ -63,12 +62,14 @@ const reformatIcons = () => {
     } else {
       iconMap.set(icon.namespace, [icon]);
     }
-    // if (i > 2) {
-    //   break;
-    // }
-    // i++;
   }
   return iconMap;
+  // for test purposes ...
+  // return new Map([
+  //   ['Q/bloch-sphere', iconMap.get('Q/bloch-sphere')],
+  //   ['watson-health/3D-Cursor', iconMap.get('watson-health/3D-Cursor')],
+  //   ['arrow--down', iconMap.get('arrow--down')]
+  // ]);
 };
 
 /**
@@ -90,7 +91,9 @@ function emitModule(namespace, scriptTarget) {
     fileName: 'icon.ts',
     scriptTarget,
     outPath: `${baseOutFilePath}/${modulePath}/${namespace}`,
-    moduleId: `${namespace.split('/').join('-')}`,
+    // TODO: remove if the alternative works well enough
+    // moduleId: `${namespace.split('/').join('-')}`,
+    moduleId: `${namespace}`,
     sourceFile: `${sourcePath}/${namespace}/icon.ts`,
     declarationPath: `${baseOutFilePath}/${namespace}`,
     sourcePath: `${sourcePath}/${namespace}`
@@ -102,18 +105,22 @@ function emitModule(namespace, scriptTarget) {
 async function writeIconMetadata(namespace) {
   const baseOutFilePath = `${__dirname}/../dist`;
   const iconPath = `${baseOutFilePath}/${namespace}`;
-  const flatNamespace = namespace.split('/').join('-');
+  // TODO: remove if the alternative works well enough
+  // const flatNamespace = namespace.split('/').join('-');
+  const flatNamespace = namespace;
+  // generate the right number of `../`s for the depth of the icon
+  const dirUps = namespace.split('/').map(() => '../').join('');
   // package.json for the icon ... allows each icon to be imported individually
   const iconPackageJson = {
     name: `@carbon/icons-angular/${namespace}`,
-    main: `../bundles/${namespace}.umd.js`,
-    fesm5: `../fesm5/${flatNamespace}.js`,
-    fesm2015: `../fesm2015/${flatNamespace}.js`,
-    esm5: `../esm5/${namespace}/index.js`,
-    esm2015: `../esm2015/${namespace}/index.js`,
+    main: `${dirUps}bundles/${namespace}.umd.js`,
+    fesm5: `${dirUps}fesm5/${flatNamespace}.js`,
+    fesm2015: `${dirUps}fesm2015/${flatNamespace}.js`,
+    esm5: `${dirUps}esm5/${namespace}/index.js`,
+    esm2015: `${dirUps}esm2015/${namespace}/index.js`,
     typings: `./index.d.ts`,
-    module: `../fesm5/${flatNamespace}.js`,
-    es2015: `../fesm2015/${flatNamespace}.js`,
+    module: `${dirUps}fesm5/${flatNamespace}.js`,
+    es2015: `${dirUps}fesm2015/${flatNamespace}.js`,
     metadata: './index.metadata.json'
   };
 
@@ -289,7 +296,9 @@ async function writeBundles(namespace) {
       });
     } else {
       outputOptions = getRollupOutputOptions({
-        file: `dist/f${format}/${namespace.split('/').join('-')}.js`,
+        // TODO: remove if the alternative works well enough
+        // file: `dist/f${format}/${namespace.split('/').join('-')}.js`,
+        file: `dist/f${format}/${namespace}.js`,
         format: 'es',
         name: `CarbonIconsAngular.${pascal(namespace)}`
       });

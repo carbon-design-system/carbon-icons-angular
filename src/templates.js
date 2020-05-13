@@ -161,20 +161,6 @@ ${directiveTemplate(icons)}
 export class ${classCase(namespace)}Module {}
 `;
 
-rootModule = (namespaces) => `
-import {
-  NgModule
-} from "@angular/core";
-${namespaces.reduce((str, name) => `${str}\nimport { ${classCase(name)}Module } from "./${name}/icon";`,'')}
-
-@NgModule({
-  imports: [
-    ${namespaces.reduce((str, name) => `${str}${classCase(name)}Module,\n`, '')}
-  ]
-})
-export class CarbonIconsAngularModule {}
-`;
-
 const rootPublicApi = namespaces =>
   namespaces.reduce(
     (str, name) => `${str}
@@ -190,6 +176,7 @@ const flatRootPublicApi = namespaces =>
     (str, name) => `${str}
 export * from "@carbon/icons-angular/${name}";`, '');
 
+// TODO: remove if the alternative works well enough
 // old flat api
 // const _flatRootPublicApi = namespaces =>
 //   namespaces.reduce(
@@ -206,6 +193,5 @@ module.exports = {
   rootPublicApi,
   dtsRootPublicApi,
   jsRootPublicApi,
-  flatRootPublicApi,
-  rootModule
+  flatRootPublicApi
 };
