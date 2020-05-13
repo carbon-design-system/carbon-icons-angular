@@ -21,7 +21,7 @@ const { pascal } = require('change-case');
 const {
   moduleTemplate,
   rootPublicApi,
-  tsRootPublicApi,
+  dtsRootPublicApi,
   jsRootPublicApi,
   flatRootPublicApi
 } = require('./templates');
@@ -31,6 +31,7 @@ const paths = require('./paths');
 
 const reformatIcons = () => {
   let iconMap = new Map();
+  // let i = 0;
   for (const carbonIcon of icons) {
     const icon = JSON.parse(JSON.stringify(carbonIcon));
     /**
@@ -62,6 +63,10 @@ const reformatIcons = () => {
     } else {
       iconMap.set(icon.namespace, [icon]);
     }
+    // if (i > 2) {
+    //   break;
+    // }
+    // i++;
   }
   return iconMap;
 };
@@ -108,7 +113,8 @@ async function writeIconMetadata(namespace) {
     esm2015: `../esm2015/${namespace}/index.js`,
     typings: `./index.d.ts`,
     module: `../fesm5/${flatNamespace}.js`,
-    es2015: `../fesm2015/${flatNamespace}.js`
+    es2015: `../fesm2015/${flatNamespace}.js`,
+    metadata: './index.metadata.json'
   };
 
   const iconMeta = JSON.parse(await fs.readFile(`${iconPath}/index.metadata.json`));
@@ -202,7 +208,7 @@ function ngCompile(options) {
     const emitFlags = config.options.declaration ? config.emitFlags : ng.EmitFlags.JS;
     const result = program.emit({
       emitFlags,
-      emitCallback: createEmitCallback(config.options),
+      emitCallback: config.options.enableIvy ? undefined : createEmitCallback(config.options),
       customTransformers: {
         beforeTs
       }
@@ -304,70 +310,60 @@ async function writeMetadata() {
   packageJson.esm2015 = './esm2015/index.js';
   packageJson.fesm5 = './fesm5/index.js';
   packageJson.fesm2015 = './fesm2015/index.js';
-  packageJson.bundles = './bundles/carbon-icons-angular.js';
-  packageJson.main = './bundles/carbon-icons-angular.js';
+  packageJson.bundles = './bundles/carbon-icons-angular.umd.js';
+  packageJson.main = './bundles/carbon-icons-angular.umd.js';
   packageJson.module = './fesm5/index.js';
   packageJson.typings = './index.d.ts';
-  // packageJson.metadata = './index.metadata.json';
+  packageJson.metadata = './index.metadata.json';
 
-  // const metadataJson = {
-  //   __symbolic: 'module',
-  //   version: 4,
-  //   metadata: {},
-  //   // exports: [],
-  //   importAs: '@carbon/icons-angular'
-  // };
+  const metadataJson = {
+    __symbolic: 'module',
+    version: 4,
+    metadata: {},
+    exports: [],
+    importAs: '@carbon/icons-angular'
+  };
 
-  // const iconMap = reformatIcons();
+  const iconMap = reformatIcons();
 
-  // const baseOutFilePath = `${__dirname}/../dist`;
-  // let metadataFileReads = [];
+  const baseOutFilePath = `${__dirname}/../dist`;
+  let metadataFileReads = [];
 
-  // for (const [namespace, icons] of iconMap) {
-  //   // read all the metadata files
-  //   metadataFileReads.push(fs.readFile(`${baseOutFilePath}/${namespace}/index.metadata.json`)
-  //     .then(value => JSON.parse(value))
-  //     .catch(error => {
-  //       console.error(error);
-  //     }));
-  // }
+  for (const [namespace, icons] of iconMap) {
+    // read all the metadata files
+    metadataFileReads.push(fs.readFile(`${baseOutFilePath}/${namespace}/index.metadata.json`)
+      .then(value => JSON.parse(value))
+      .catch(error => {
+        console.error(error);
+      }));
+    metadataJson.exports.push({
+      from: `@carbon/icons-angular/${namespace}`
+    });
+  }
 
-  // // wait for all the files to resolve
-  // const metadatas = await Promise.all(metadataFileReads);
+  // wait for all the files to resolve
+  const metadatas = await Promise.all(metadataFileReads);
 
-  // // then add the metadata for each icon to the root metadata
-  // metadatas.forEach(meta => {
-  //   if (!meta) {
-  //     console.error("no metadata found!");
-  //     return;
-  //   }
-  //   Object.entries(meta.metadata).forEach(([key, value]) => {
-  //     metadataJson.metadata[key] = value;
-  //   });
-  // });
+  // then add the metadata for each icon to the root metadata
+  metadatas.forEach(meta => {
+    if (!meta) {
+      console.error("no metadata found!");
+      return;
+    }
+  });
 
   await fs.writeFile('dist/package.json', JSON.stringify(packageJson));
-  // await fs.writeFile('dist/index.metadata.json', JSON.stringify(metadataJson));
+  await fs.writeFile('dist/index.metadata.json', JSON.stringify(metadataJson));
 }
 
 async function writeIndexes(iconMap) {
-  // const namespaces = Array.from(iconMap.keys());
-  // await Promise.all([
-  //   fs.writeFile('dist/index.d.ts', tsRootPublicApi(namespaces)),
-  //   fs.writeFile('dist/esm5/index.js', jsRootPublicApi(namespaces)),
-  //   fs.writeFile('dist/esm2015/index.js', jsRootPublicApi(namespaces)),
-  //   fs.writeFile('dist/fesm5/index.js', flatRootPublicApi(namespaces)),
-  //   fs.writeFile('dist/fesm2015/index.js', flatRootPublicApi(namespaces))
-  // ]);
-  const emptyIndex = `
-  // empty index so ngcc doesn't run
-  `;
+  const namespaces = Array.from(iconMap.keys());
   await Promise.all([
-    fs.writeFile('dist/index.d.ts', emptyIndex),
-    fs.writeFile('dist/esm5/index.js', emptyIndex),
-    fs.writeFile('dist/esm2015/index.js', emptyIndex),
-    fs.writeFile('dist/fesm5/index.js', emptyIndex),
-    fs.writeFile('dist/fesm2015/index.js', emptyIndex)
+    fs.writeFile('dist/index.d.ts', dtsRootPublicApi(namespaces)),
+    fs.writeFile('dist/esm5/index.js', jsRootPublicApi(namespaces)),
+    fs.writeFile('dist/esm2015/index.js', jsRootPublicApi(namespaces)),
+    fs.writeFile('dist/fesm5/index.js', flatRootPublicApi(namespaces)),
+    fs.writeFile('dist/fesm2015/index.js', flatRootPublicApi(namespaces))
   ]);
 }
 

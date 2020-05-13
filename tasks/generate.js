@@ -99,6 +99,7 @@ if (cluster.isMaster) {
       ]).then(() =>{
         process.send({ state: 'done' });
       }).catch((error) => {
+        console.error(`Error building ${namespace}`);
         console.error(error);
         process.send({ state: 'error' });
       });

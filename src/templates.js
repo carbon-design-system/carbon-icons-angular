@@ -161,20 +161,40 @@ ${directiveTemplate(icons)}
 export class ${classCase(namespace)}Module {}
 `;
 
+rootModule = (namespaces) => `
+import {
+  NgModule
+} from "@angular/core";
+${namespaces.reduce((str, name) => `${str}\nimport { ${classCase(name)}Module } from "./${name}/icon";`,'')}
+
+@NgModule({
+  imports: [
+    ${namespaces.reduce((str, name) => `${str}${classCase(name)}Module,\n`, '')}
+  ]
+})
+export class CarbonIconsAngularModule {}
+`;
+
 const rootPublicApi = namespaces =>
   namespaces.reduce(
     (str, name) => `${str}
 export * from "./${name}/icon";`,'');
 
-const tsRootPublicApi = namespaces =>
+const dtsRootPublicApi = namespaces =>
   namespaces.reduce(
     (str, name) => `${str}
-export * from "./${name}";`, '');
+export * from "@carbon/icons-angular/${name}";`, '');
 
 const flatRootPublicApi = namespaces =>
   namespaces.reduce(
     (str, name) => `${str}
-export * from "./${name.split('/').join('-')}";`, '');
+export * from "@carbon/icons-angular/${name}";`, '');
+
+// old flat api
+// const _flatRootPublicApi = namespaces =>
+//   namespaces.reduce(
+//     (str, name) => `${str}
+// export * from "./${name.split('/').join('-')}";`, '');
 
 const jsRootPublicApi = namespaces =>
   namespaces.reduce(
@@ -184,7 +204,8 @@ export * from "./${name}/index";`, '');
 module.exports = {
   moduleTemplate,
   rootPublicApi,
-  tsRootPublicApi,
+  dtsRootPublicApi,
   jsRootPublicApi,
-  flatRootPublicApi
+  flatRootPublicApi,
+  rootModule
 };
