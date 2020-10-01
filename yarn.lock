@@ -70,10 +70,10 @@
   resolved "https://registry.yarnpkg.com/@carbon/icon-helpers/-/icon-helpers-10.6.0.tgz#72a5bbd1edbee3728e47fa6d17c2aca67dbb101c"
   integrity sha512-4Nh6l+B8SRNyw1RpgNT4Z83Aa5UwRFmKJ2mx5m7mE5TqxPkfIZjyyLHyv5gl3gPtaVwq78ZGz80wG0NRQzRM7g==
 
-"@carbon/icons@10.10.2":
-  version "10.10.2"
-  resolved "https://registry.yarnpkg.com/@carbon/icons/-/icons-10.10.2.tgz#34b053a03cdbf68b52b5be03573fc9885dec2794"
-  integrity sha512-aJwlQUp3A3bHXG4wtCXFdFq41c+t4a7E16S1bF4/5YsXwJra6n5gASeHtRCY1hLg9I7FPlYfqCyRhfI4xygjzg==
+"@carbon/icons@10.18.0":
+  version "10.18.0"
+  resolved "https://registry.yarnpkg.com/@carbon/icons/-/icons-10.18.0.tgz#544451253f8606a3c7dead7f5756f65d799ae573"
+  integrity sha512-yBKfOoWHetNPO7rkh1l9B1XqS05QLAatOdNbNMgHbwEEMYwYgvs62sOgQWZr4IOJO/mcZYNUzPhMi6gdlAYcrQ==
 
 "@iarna/cli@^1.2.0":
   version "1.2.0"
@@ -3621,7 +3621,6 @@ npm@^6.10.3:
     cmd-shim "^3.0.3"
     columnify "~1.5.4"
     config-chain "^1.1.12"
-    debuglog "*"
     detect-indent "~5.0.0"
     detect-newline "^2.1.0"
     dezalgo "~1.0.3"
@@ -3636,7 +3635,6 @@ npm@^6.10.3:
     has-unicode "~2.0.1"
     hosted-git-info "^2.8.8"
     iferr "^1.0.2"
-    imurmurhash "*"
     infer-owner "^1.0.4"
     inflight "~1.0.6"
     inherits "^2.0.4"
@@ -3655,14 +3653,8 @@ npm@^6.10.3:
     libnpx "^10.2.4"
     lock-verify "^2.1.0"
     lockfile "^1.0.4"
-    lodash._baseindexof "*"
     lodash._baseuniq "~4.6.0"
-    lodash._bindcallback "*"
-    lodash._cacheindexof "*"
-    lodash._createcache "*"
-    lodash._getnative "*"
     lodash.clonedeep "~4.5.0"
-    lodash.restparam "*"
     lodash.union "~4.6.0"
     lodash.uniq "~4.5.0"
     lodash.without "~4.4.0"
