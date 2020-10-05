@@ -94,32 +94,6 @@ function emitModule(namespace, scriptTarget) {
   ngCompile(options);
 }
 
-async function writeIconMetadata(namespace) {
-  const baseOutFilePath = `${__dirname}/../dist`;
-  const iconPath = `${baseOutFilePath}/${namespace}`;
-  const flatNamespace = namespace.split('/').join('-');
-  // package.json for the icon ... allows each icon to be imported individually
-  const iconPackageJson = {
-    name: `@carbon/icons-angular/${namespace}`,
-    main: `../bundles/${namespace}.umd.js`,
-    fesm5: `../fesm5/${flatNamespace}.js`,
-    fesm2015: `../fesm2015/${flatNamespace}.js`,
-    esm5: `../esm5/${namespace}/index.js`,
-    esm2015: `../esm2015/${namespace}/index.js`,
-    typings: `./index.d.ts`,
-    module: `../fesm5/${flatNamespace}.js`,
-    es2015: `../fesm2015/${flatNamespace}.js`
-  };
-
-  const iconMeta = JSON.parse(await fs.readFile(`${iconPath}/index.metadata.json`));
-
-  // set the right `importAs` (should match the `name` in `iconPackageJson`)
-  iconMeta.importAs = `@carbon/icons-angular/${namespace}`;
-
-  await fs.writeFile(`${iconPath}/package.json`, JSON.stringify(iconPackageJson));
-  await fs.writeFile(`${iconPath}/index.metadata.json`, JSON.stringify(iconMeta));
-}
-
 /**
  *
  * @param {{
@@ -314,37 +288,17 @@ async function writeMetadata() {
     __symbolic: 'module',
     version: 4,
     metadata: {},
-    // exports: [],
+    exports: [],
     importAs: '@carbon/icons-angular'
   };
 
   const iconMap = reformatIcons();
 
-  const baseOutFilePath = `${__dirname}/../dist`;
-  let metadataFileReads = [];
-
   for (const [namespace, icons] of iconMap) {
-    // read all the metadata files
-    metadataFileReads.push(fs.readFile(`${baseOutFilePath}/${namespace}/index.metadata.json`)
-      .then(value => JSON.parse(value))
-      .catch(error => {
-        console.error(error);
-      }));
-  }
-
-  // wait for all the files to resolve
-  const metadatas = await Promise.all(metadataFileReads);
-
-  // then add the metadata for each icon to the root metadata
-  metadatas.forEach(meta => {
-    if (!meta) {
-      console.error("no metadata found!");
-      return;
-    }
-    Object.entries(meta.metadata).forEach(([key, value]) => {
-      metadataJson.metadata[key] = value;
+    metadataJson.exports.push({
+      from: `./${namespace}`
     });
-  });
+  }
 
   await fs.writeFile('dist/package.json', JSON.stringify(packageJson));
   await fs.writeFile('dist/index.metadata.json', JSON.stringify(metadataJson));
@@ -404,6 +358,5 @@ module.exports = {
   writeMegaBundle,
   writeMetadata,
   emitModule,
-  writeBundles,
-  writeIconMetadata
+  writeBundles
 };
