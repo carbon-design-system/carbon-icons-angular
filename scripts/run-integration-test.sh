@@ -11,6 +11,7 @@ cd tests/integration
 
 echo "installing dependencies"
 npm i
+npm i ../../carbon-icons-angular-0.0.0.tgz
 
 echo "testing"
 npm run test
