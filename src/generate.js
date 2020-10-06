@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-const icons = require('@carbon/icons/build-info.json');
+const iconMetadata = require('@carbon/icons/metadata.json');
 const { reporter } = require('@carbon/cli-reporter');
 const fs = require('fs-extra');
 const { dirname } = require('path');
@@ -64,6 +64,13 @@ const reformatIcons = () => {
     }
   }
   return iconMap;
+};
+
+const getNamespace = (iconMeta) => {
+  if (iconMeta.namespace.length > 0) {
+    return `${iconMeta.namespace.join('/')}/${iconMeta.name}`;
+  }
+  return iconMeta.name;
 };
 
 /**
@@ -278,8 +285,8 @@ async function writeMetadata() {
   packageJson.esm2015 = './esm2015/index.js';
   packageJson.fesm5 = './fesm5/index.js';
   packageJson.fesm2015 = './fesm2015/index.js';
-  packageJson.bundles = './bundles/carbon-components-angular.js';
-  packageJson.main = './bundles/carbon-components-angular.js';
+  packageJson.bundles = './bundles/carbon-icons-angular.umd.js';
+  packageJson.main = './bundles/carbon-icons-angular.umd.js';
   packageJson.module = './fesm5/index.js';
   packageJson.typings = './index.d.ts';
   packageJson.metadata = './index.metadata.json';
@@ -292,11 +299,9 @@ async function writeMetadata() {
     importAs: '@carbon/icons-angular'
   };
 
-  const iconMap = reformatIcons();
-
-  for (const [namespace, icons] of iconMap) {
+  for (const iconMeta of iconMetadata.icons) {
     metadataJson.exports.push({
-      from: `./${namespace}`
+      from: `./${getNamespace(iconMeta)}`
     });
   }
 
@@ -304,8 +309,8 @@ async function writeMetadata() {
   await fs.writeFile('dist/index.metadata.json', JSON.stringify(metadataJson));
 }
 
-async function writeIndexes(iconMap) {
-  const namespaces = Array.from(iconMap.keys());
+async function writeIndexes(icons) {
+  const namespaces = icons.map(iconMeta => getNamespace(iconMeta));
   await Promise.all([
     fs.writeFile('dist/index.d.ts', tsRootPublicApi(namespaces)),
     fs.writeFile('dist/esm5/index.js', jsRootPublicApi(namespaces)),
@@ -315,18 +320,19 @@ async function writeIndexes(iconMap) {
   ]);
 }
 
-async function generateComponents(iconMap) {
-  for (const [namespace, icons] of iconMap) {
+async function generateComponents(icons) {
+  for (const iconMeta of icons) {
+    const namespace = getNamespace(iconMeta);
     await fs.ensureDir(`ts/${namespace}`);
 
-    const moduleString = moduleTemplate(namespace, icons);
+    const moduleString = moduleTemplate(namespace, iconMeta);
     await fs.writeFile(`ts/${namespace}/icon.ts`, moduleString);
   }
 
   // get all the namespaces to build the import definitions
-  const namespaces = Array.from(iconMap.keys());
+  const namespaces = icons.map(iconMeta => getNamespace(iconMeta));
   await fs.writeFile('ts/index.ts', rootPublicApi(namespaces));
-  return Array.from(iconMap);
+  return namespaces;
 }
 
 async function generate() {
@@ -346,11 +352,9 @@ async function generate() {
     reporter.error(err);
   }
 
-  const iconMap = reformatIcons();
-
   reporter.log('Generating source components...');
-  await writeIndexes(iconMap);
-  return await generateComponents(iconMap);
+  await writeIndexes(iconMetadata.icons);
+  return await generateComponents(iconMetadata.icons);
 }
 
 module.exports = {
@@ -358,5 +362,6 @@ module.exports = {
   writeMegaBundle,
   writeMetadata,
   emitModule,
-  writeBundles
+  writeBundles,
+  getNamespace
 };

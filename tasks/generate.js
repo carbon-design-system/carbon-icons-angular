@@ -27,7 +27,7 @@ if (cluster.isMaster) {
 
   // handles distributing compilation tasks to workers
   // and reporting the state (finished/error/etc)
-  const buildIcons = (iconArray, resolve, reject) => {
+  const buildIcons = (namespaceArray, resolve, reject) => {
     console.log('starting parallel ng compile');
     let lastIcon = 0;
     let finishedWorkers = 0;
@@ -37,11 +37,11 @@ if (cluster.isMaster) {
       worker.send({ state: 'ready' });
 
       worker.on('message', ({ state }) => {
-        if ((state === 'done' || state === 'waiting') && lastIcon < iconArray.length) {
-          worker.send({ state: 'build', namespace: iconArray[lastIcon][0] });
+        if ((state === 'done' || state === 'waiting') && lastIcon < namespaceArray.length) {
+          worker.send({ state: 'build', namespace: namespaceArray[lastIcon] });
           lastIcon++;
-          console.log(`${iconArray.length - lastIcon} icons left`);
-        } else if (lastIcon >= iconArray.length) {
+          console.log(`${namespaceArray.length - lastIcon} icons left`);
+        } else if (lastIcon >= namespaceArray.length) {
           finishedWorkers++;
           if (finishedWorkers === numCPUs) {
             resolve();
@@ -55,9 +55,9 @@ if (cluster.isMaster) {
   }
 
   generate()
-  .then(iconArray => {
+  .then(namespaceArray => {
     return new Promise((resolve, reject) => {
-      buildIcons(iconArray, resolve, reject);
+      buildIcons(namespaceArray, resolve, reject);
     });
   })
   .then(() => {

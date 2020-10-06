@@ -7,6 +7,7 @@
 
 const { param, pascal } = require('change-case');
 const { toString } = require('@carbon/icon-helpers');
+const { getNamespace } = require('./generate');
 
 const classCase = str => {
   const pascalled = pascal(str);
@@ -17,12 +18,12 @@ const classCase = str => {
   return `_${pascalled}`;
 };
 
-const componentTemplate = icon => `
+const componentTemplate = namespace => `
 @Component({
-	selector: "ibm-icon-${param(icon.namespace)}",
+	selector: "ibm-icon-${param(namespace)}",
   template: \`
     <svg
-      ibmIcon${pascal(icon.namespace)}
+      ibmIcon${pascal(namespace)}
       [size]="size"
       [ariaLabel]="ariaLabel"
       [ariaLabelledby]="ariaLabelledby"
@@ -33,7 +34,7 @@ const componentTemplate = icon => `
     </svg>
   \`
 })
-export class ${classCase(icon.namespace)}Component {
+export class ${classCase(namespace)}Component {
   @Input() ariaLabel: string;
   @Input() ariaLabelledby: string;
   @Input() ariaHidden: boolean;
@@ -51,12 +52,12 @@ const formatIconObject = icon => `
   },
 `;
 
-const directiveTemplate = icons => `
+const directiveTemplate = (namespace, iconMeta) => `
 @Directive({
-  selector: "[ibmIcon${pascal(icons[0].namespace)}]"
+  selector: "[ibmIcon${pascal(namespace)}]"
 })
 export class ${classCase(
-  icons[0].namespace
+  namespace
 )}Directive implements AfterViewInit {
   static titleIdCounter = 0;
 
@@ -68,7 +69,7 @@ export class ${classCase(
   @Input() size: string;
 
   protected icons = {
-    ${icons.reduce((str, icon) => `${str}${formatIconObject(icon)}`, '')}
+    ${iconMeta.output.reduce((str, icon) => `${str}${formatIconObject(icon)}`, '')}
   };
 
   constructor(protected elementRef: ElementRef) {}
@@ -117,25 +118,25 @@ export class ${classCase(
     if (attributes.title) {
       const title = document.createElement("title");
       title.textContent = attributes.title;
-      ${classCase(icons[0].namespace)}Directive.titleIdCounter++;
-      title.setAttribute("id", \`${param(icons[0].namespace)}-$\{${classCase(
-  icons[0].namespace
+      ${classCase(namespace)}Directive.titleIdCounter++;
+      title.setAttribute("id", \`${param(namespace)}-$\{${classCase(
+  namespace
 )}Directive.titleIdCounter}\`);
       svg.appendChild(title);
       svg.setAttribute("aria-labelledby", \`${param(
-        icons[0].namespace
-      )}-$\{${classCase(icons[0].namespace)}Directive.titleIdCounter}\`);
+        namespace
+      )}-$\{${classCase(namespace)}Directive.titleIdCounter}\`);
     }
 	}
 }
 `;
 
-const formatModuleDeclarations = icon => `
-  ${classCase(icon.namespace)}Component,
-  ${classCase(icon.namespace)}Directive,
+const formatModuleDeclarations = namespace => `
+  ${classCase(namespace)}Component,
+  ${classCase(namespace)}Directive,
 `;
 
-const moduleTemplate = (namespace, icons) => `
+const moduleTemplate = (namespace, iconMeta) => `
 import {
   NgModule,
   Component,
@@ -146,16 +147,16 @@ import {
 } from "@angular/core";
 import { getAttributes } from "@carbon/icon-helpers";
 
-${componentTemplate(icons[0])}
+${componentTemplate(namespace)}
 
-${directiveTemplate(icons)}
+${directiveTemplate(namespace, iconMeta)}
 
 @NgModule({
   declarations: [
-    ${formatModuleDeclarations(icons[0])}
+    ${formatModuleDeclarations(namespace)}
   ],
   exports: [
-    ${formatModuleDeclarations(icons[0])}
+    ${formatModuleDeclarations(namespace)}
   ]
 })
 export class ${classCase(namespace)}Module {}
