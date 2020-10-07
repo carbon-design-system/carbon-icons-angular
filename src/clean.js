@@ -11,12 +11,12 @@ const paths = require('./paths');
 async function clean() {
   cleanSome([
     paths.TS,
-    paths.LIB,
-    paths.UMD,
-    paths.WASTE,
-    paths.EXAMPLES_LIB,
-    paths.STORIES,
     paths.DIST,
+    paths.ESM5,
+    paths.ESM2015,
+    paths.FESM5,
+    paths.FESM2015,
+    paths.BUNDLES
   ]);
 }
 

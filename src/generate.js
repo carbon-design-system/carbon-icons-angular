@@ -8,7 +8,6 @@
 const iconMetadata = require('@carbon/icons/metadata.json');
 const { reporter } = require('@carbon/cli-reporter');
 const fs = require('fs-extra');
-const { dirname } = require('path');
 
 const { createEmitCallback } = require('ng-packagr/lib/ngc/create-emit-callback');
 const { downlevelConstructorParameters } = require('ng-packagr/lib/ts/ctor-parameters');
@@ -29,43 +28,6 @@ const {
 // local utilities
 const paths = require('./paths');
 
-const reformatIcons = () => {
-  let iconMap = new Map();
-  for (const carbonIcon of icons) {
-    const icon = JSON.parse(JSON.stringify(carbonIcon));
-    /**
-     * index.js is generally the implied default import for a path
-     * ex: `import { Foo } from '@bar/foo';` would try to import `Foo` from
-     * `@bar/foo/index.js`, however `@carbon/icons` uses this for 'glyph' size icons.
-     * This block swaps that for a `glyph.ts` which is more useful.
-     */
-    if (icon.outputOptions.file.endsWith('index.js')) {
-      icon.outputOptions.file = icon.outputOptions.file.replace(
-        'index.js',
-        'glyph.ts'
-      );
-      icon.size = 'glyph';
-    }
-
-    // set the correct output options
-    icon.outputOptions.file = icon.outputOptions.file
-      .replace(/^es\//, 'ts/')
-      .replace('.js', '.ts');
-
-    // the namespace consists of 1 or more values, seperated by a `/`
-    // effectivly, the icon path without the root directory (`ts`) or output filename
-    icon.namespace = dirname(icon.outputOptions.file.replace(/^ts\//, ''));
-
-    // add our modified icon descriptor to the output map by namespace
-    if (iconMap.has(icon.namespace)) {
-      iconMap.get(icon.namespace).push(icon);
-    } else {
-      iconMap.set(icon.namespace, [icon]);
-    }
-  }
-  return iconMap;
-};
-
 const getNamespace = (iconMeta) => {
   if (iconMeta.namespace.length > 0) {
     return `${iconMeta.namespace.join('/')}/${iconMeta.name}`;
@@ -79,8 +41,6 @@ const getNamespace = (iconMeta) => {
  * @param {*} scriptTarget ts.ScriptTarget
  */
 function emitModule(namespace, scriptTarget) {
-  const baseOutFilePath = `${__dirname}/../dist`;
-  const sourcePath = `${__dirname}/../ts`;
   let modulePath = '';
   if (scriptTarget === ts.ScriptTarget.ES2015) {
     modulePath = 'esm2015';
@@ -91,11 +51,11 @@ function emitModule(namespace, scriptTarget) {
   const options = {
     fileName: 'icon.ts',
     scriptTarget,
-    outPath: `${baseOutFilePath}/${modulePath}/${namespace}`,
+    outPath: `${paths.DIST}/${modulePath}/${namespace}`,
     moduleId: `${namespace.split('/').join('-')}`,
-    sourceFile: `${sourcePath}/${namespace}/icon.ts`,
-    declarationPath: `${baseOutFilePath}/${namespace}`,
-    sourcePath: `${sourcePath}/${namespace}`
+    sourceFile: `${paths.TS}/${namespace}/icon.ts`,
+    declarationPath: `${paths.DIST}/${namespace}`,
+    sourcePath: `${paths.TS}/${namespace}`
   };
 
   ngCompile(options);
@@ -211,7 +171,7 @@ const getRollupInputOptions = ({sourceType, namespace}) => ({
     '@angular/core',
     '@carbon/icon-helpers'
   ],
-  input: `dist/${sourceType}/${namespace ? namespace : ''}/index.js`,
+  input: `${paths.DIST}/${sourceType}/${namespace ? namespace : ''}/index.js`,
   onwarn(warning) {
     if (warning.code === 'UNUSED_EXTERNAL_IMPORT') {
       return;
@@ -235,7 +195,7 @@ async function writeMegaBundle() {
   });
 
   const outputOptions = getRollupOutputOptions({
-    file: 'dist/bundles/carbon-icons-angular.umd.js',
+    file: `${paths.BUNDLES}/carbon-icons-angular.umd.js`,
     format: 'umd',
     name: 'CarbonIconsAngular'
   });
@@ -258,13 +218,13 @@ async function writeBundles(namespace) {
 
     if (format === 'bundles') {
       outputOptions = getRollupOutputOptions({
-        file: `dist/bundles/${namespace.split('/').join('-')}.umd.js`,
+        file: `${paths.BUNDLES}/${namespace.split('/').join('-')}.umd.js`,
         format: 'umd',
         name: `CarbonIconsAngular.${pascal(namespace)}`
       });
     } else {
       outputOptions = getRollupOutputOptions({
-        file: `dist/f${format}/${namespace.split('/').join('-')}.js`,
+        file: `${paths.DIST}/f${format}/${namespace.split('/').join('-')}.js`,
         format: 'es',
         name: `CarbonIconsAngular.${pascal(namespace)}`
       });
@@ -281,6 +241,7 @@ async function writeBundles(namespace) {
 async function writeMetadata() {
   const packageJson = require('../package.json');
 
+  // use paths relative to the built files and the `package.json`s final location next to them
   packageJson.esm5 = './esm5/index.js';
   packageJson.esm2015 = './esm2015/index.js';
   packageJson.fesm5 = './fesm5/index.js';
@@ -305,33 +266,33 @@ async function writeMetadata() {
     });
   }
 
-  await fs.writeFile('dist/package.json', JSON.stringify(packageJson));
-  await fs.writeFile('dist/index.metadata.json', JSON.stringify(metadataJson));
+  await fs.writeFile(`${paths.DIST}/package.json`, JSON.stringify(packageJson));
+  await fs.writeFile(`${paths.DIST}/index.metadata.json`, JSON.stringify(metadataJson));
 }
 
 async function writeIndexes(icons) {
   const namespaces = icons.map(iconMeta => getNamespace(iconMeta));
   await Promise.all([
-    fs.writeFile('dist/index.d.ts', tsRootPublicApi(namespaces)),
-    fs.writeFile('dist/esm5/index.js', jsRootPublicApi(namespaces)),
-    fs.writeFile('dist/esm2015/index.js', jsRootPublicApi(namespaces)),
-    fs.writeFile('dist/fesm5/index.js', flatRootPublicApi(namespaces)),
-    fs.writeFile('dist/fesm2015/index.js', flatRootPublicApi(namespaces))
+    fs.writeFile(`${paths.DIST}/index.d.ts`, tsRootPublicApi(namespaces)),
+    fs.writeFile(`${paths.ESM5}/index.js`, jsRootPublicApi(namespaces)),
+    fs.writeFile(`${paths.ESM2015}/index.js`, jsRootPublicApi(namespaces)),
+    fs.writeFile(`${paths.FESM5}/index.js`, flatRootPublicApi(namespaces)),
+    fs.writeFile(`${paths.FESM2015}/index.js`, flatRootPublicApi(namespaces))
   ]);
 }
 
 async function generateComponents(icons) {
   for (const iconMeta of icons) {
     const namespace = getNamespace(iconMeta);
-    await fs.ensureDir(`ts/${namespace}`);
+    await fs.ensureDir(`${paths.TS}/${namespace}`);
 
     const moduleString = moduleTemplate(namespace, iconMeta);
-    await fs.writeFile(`ts/${namespace}/icon.ts`, moduleString);
+    await fs.writeFile(`${paths.TS}/${namespace}/icon.ts`, moduleString);
   }
 
   // get all the namespaces to build the import definitions
   const namespaces = icons.map(iconMeta => getNamespace(iconMeta));
-  await fs.writeFile('ts/index.ts', rootPublicApi(namespaces));
+  await fs.writeFile(`${paths.TS}/index.ts`, rootPublicApi(namespaces));
   return namespaces;
 }
 
@@ -340,13 +301,13 @@ async function generate() {
   try {
     // ensure our build directories are created
     await Promise.all([
-      fs.ensureDir(paths.STORIES),
       fs.ensureDir(paths.TS),
-      fs.ensureDir('dist'),
-      fs.ensureDir('dist/esm5'),
-      fs.ensureDir('dist/esm2015'),
-      fs.ensureDir('dist/fesm5'),
-      fs.ensureDir('dist/fesm2015')
+      fs.ensureDir(paths.DIST),
+      fs.ensureDir(paths.ESM5),
+      fs.ensureDir(paths.ESM2015),
+      fs.ensureDir(paths.FESM5),
+      fs.ensureDir(paths.FESM2015),
+      fs.ensureDir(paths.BUNDLES)
     ]);
   } catch (err) {
     reporter.error(err);

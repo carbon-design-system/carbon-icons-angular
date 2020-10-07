@@ -7,7 +7,6 @@
 
 const { param, pascal } = require('change-case');
 const { toString } = require('@carbon/icon-helpers');
-const { getNamespace } = require('./generate');
 
 const classCase = str => {
   const pascalled = pascal(str);
