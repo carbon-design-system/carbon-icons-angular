@@ -5,62 +5,33 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-const icons = require('@carbon/icons/build-info.json');
+const iconMetadata = require('@carbon/icons/metadata.json');
 const { reporter } = require('@carbon/cli-reporter');
 const fs = require('fs-extra');
-const { dirname } = require('path');
 
 const { moduleTemplate, rootPublicApi } = require('./templates');
 
 // local utilities
 const paths = require('./paths');
 
-const reformatIcons = () => {
-  let iconMap = new Map();
-  for (const icon of icons) {
-    /**
-     * index.js is generally the implied default import for a path
-     * ex: `import { Foo } from '@bar/foo';` would try to import `Foo` from
-     * `@bar/foo/index.js`, however `@carbon/icons` uses this for 'glyph' size icons.
-     * This block swaps that for a `glyph.ts` which is more useful.
-     */
-    if (icon.outputOptions.file.endsWith('index.js')) {
-      icon.outputOptions.file = icon.outputOptions.file.replace(
-        'index.js',
-        'glyph.ts'
-      );
-      icon.size = 'glyph';
-    }
-
-    // set the correct output options
-    icon.outputOptions.file = icon.outputOptions.file
-      .replace('es', 'ts')
-      .replace('.js', '.ts');
-
-    // the namespace consists of 1 or more values, seperated by a `/`
-    // effectivly, the icon path without the root directory (`ts`) or output filename
-    icon.namespace = dirname(icon.outputOptions.file.replace('ts/', ''));
-
-    // add our modified icon descriptor to the output map by namespace
-    if (iconMap.has(icon.namespace)) {
-      iconMap.get(icon.namespace).push(icon);
-    } else {
-      iconMap.set(icon.namespace, [icon]);
-    }
+const getNamespace = (iconMeta) => {
+  if (iconMeta.namespace.length > 0) {
+    return `${iconMeta.namespace.join('/')}/${iconMeta.name}`;
   }
-  return iconMap;
+  return iconMeta.name;
 };
 
-async function generateComponents(iconMap) {
-  for (const [namespace, icons] of iconMap) {
+async function generateComponents(icons) {
+  for (const iconMeta of icons) {
+    const namespace = getNamespace(iconMeta);
     await fs.ensureDir(`ts/${namespace}`);
 
-    const moduleString = moduleTemplate(namespace, icons);
+    const moduleString = moduleTemplate(namespace, iconMeta.output);
     await fs.writeFile(`ts/${namespace}/index.ts`, moduleString);
   }
 
   // get all the namespaces to build the import definitions
-  const namespaces = Array.from(iconMap.keys());
+  const namespaces = icons.map(getNamespace);
   await fs.writeFile('ts/index.ts', rootPublicApi(namespaces));
 }
 
@@ -73,10 +44,8 @@ async function generate() {
     reporter.error(err);
   }
 
-  const iconMap = reformatIcons();
-
   reporter.log('Generating source components...');
-  await generateComponents(iconMap);
+  await generateComponents(iconMetadata.icons);
 }
 
 module.exports = generate;

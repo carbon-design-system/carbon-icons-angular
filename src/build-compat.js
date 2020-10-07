@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-const icons = require('@carbon/icons/build-info.json');
+const iconMetadata = require('@carbon/icons/metadata.json');
 const { toString } = require('@carbon/icon-helpers');
 const { reporter } = require('@carbon/cli-reporter');
 const fs = require('fs-extra');
@@ -18,54 +18,56 @@ const paths = require('./paths');
 
 async function generateComponents() {
   // loop through the icons meta array
-  for (const icon of icons) {
-    const className = icon.moduleName;
-    const selectorName = param(icon.moduleName);
-    const rawSvg = toString(icon.descriptor);
-    const outputPath = icon.outputOptions.file
-      .replace('es', 'ts')
-      .replace('.js', '.ts');
-    // try to write out the component
-    try {
-      await fs.ensureDir(dirname(outputPath));
-      await fs.writeFile(
-        outputPath,
-        componentTemplate(
-          selectorName,
-          className,
-          rawSvg,
-          icon.descriptor.attrs
-        )
-      );
-    } catch (err) {
-      reporter.error(err);
+  for (const iconMeta of iconMetadata.icons) {
+    for (const icon of iconMeta.output) {
+      const className = icon.moduleName;
+      const selectorName = param(icon.moduleName);
+      const rawSvg = toString(icon.descriptor);
+      const outputPath = `ts/${icon.filepath.replace('.js', '.ts')}`;
+      // try to write out the component
+      try {
+        await fs.ensureDir(dirname(outputPath));
+        await fs.writeFile(
+          outputPath,
+          componentTemplate(
+            selectorName,
+            className,
+            rawSvg,
+            icon.descriptor.attrs
+          )
+        );
+      } catch (err) {
+        reporter.error(err);
+      }
     }
   }
 }
 
 async function buildUMD() {
-  for (const icon of icons) {
-    const jsSource = icon.outputOptions.file.replace('es', 'dist/lib');
-    const iconbundle = await rollup({
-      input: jsSource,
-      external: ['@angular/core', '@carbon/icon-helpers'],
-      cache: false,
-      onwarn(warning, warn) {
-        if (warning.code === 'THIS_IS_UNDEFINED') return;
-        warn(warning);
-      },
-    });
+  for (const iconMeta of iconMetadata.icons) {
+    for (const icon of iconMeta.output) {
+      const jsSource = `dist/lib/${icon.filepath}`;
+      const iconbundle = await rollup({
+        input: jsSource,
+        external: ['@angular/core', '@carbon/icon-helpers'],
+        cache: false,
+        onwarn(warning, warn) {
+          if (warning.code === 'THIS_IS_UNDEFINED') return;
+          warn(warning);
+        },
+      });
 
-    const jsOutput = jsSource.replace('lib', 'umd');
-    await iconbundle.write({
-      name: 'CarbonIconsAngular',
-      format: 'umd',
-      file: jsOutput,
-      globals: {
-        '@carbon/icon-helpers': 'CarbonIconHelpers',
-        '@angular/core': 'ng.Core',
-      },
-    });
+      const jsOutput = jsSource.replace('lib', 'umd');
+      await iconbundle.write({
+        name: 'CarbonIconsAngular',
+        format: 'umd',
+        file: jsOutput,
+        globals: {
+          '@carbon/icon-helpers': 'CarbonIconHelpers',
+          '@angular/core': 'ng.Core',
+        },
+      });
+    }
   }
 }
 
@@ -105,8 +107,8 @@ async function build() {
   reporter.log('Bundling...');
   await buildUMD();
   // build the storybook examples
-  reporter.log('Generating storybook examples...');
-  buildExamples();
+  // reporter.log('Generating storybook examples...');
+  // buildExamples();
 }
 
 module.exports = build;
