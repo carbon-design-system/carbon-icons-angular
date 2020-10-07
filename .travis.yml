@@ -14,7 +14,7 @@ before_script:
   - "sudo chmod 4755 /opt/google/chrome/chrome-sandbox"
 script:
   - yarn build
-  - yarn test
+  # - yarn test
 deploy:
   provider: script
   script: "bash ./scripts/deploy.sh"
