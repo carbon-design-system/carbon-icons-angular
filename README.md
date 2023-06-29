@@ -1,6 +1,6 @@
 # :stop_sign: @carbon/icons-angular - DEPRECATED :stop_sign:
 
-This library is deprecated in favor of `@carbon/icons`. 
+This library is deprecated in favor of [`@carbon/icons`](https://www.npmjs.com/package/@carbon/icons). 
 
 @carbon/icons is the main icons package for Carbon Design System, hence you'll get updates as soon as they are made.
 Additionally, the unpacked size is significantly lower, 38MB compared to 148MB.
