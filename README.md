@@ -1,10 +1,12 @@
 # :stop_sign: @carbon/icons-angular - DEPRECATED :stop_sign:
 
-This library is now deprecated in favor of `@carbon/icons`. 
+This library is deprecated in favor of `@carbon/icons`. 
 
-@carbon/icons is the main icons package for carbon design system, hence you'll get updates as soon as they are made. Additionally, the unpacked size is significantly less, 38MB compared to 148MB.
+@carbon/icons is the main icons package for Carbon Design System, hence you'll get updates as soon as they are made.
+Additionally, the unpacked size is significantly lower, 38MB compared to 148MB.
 
-To get started with @carbon/icons check out the [code sandbox demo](https://codesandbox.io/s/gracious-diffie-7khcp3?file=/src/app/app.module.ts).
+To get started with @carbon/icons check out the
+[code sandbox demo](https://codesandbox.io/s/gracious-diffie-7khcp3?file=/src/app/app.module.ts).
 
 There are comments added to files to guide you through the usage. The relevant files to look at are:
 
@@ -12,7 +14,7 @@ There are comments added to files to guide you through the usage. The relevant f
 * [app.component.html](https://codesandbox.io/s/gracious-diffie-7khcp3?file=/src/app/app.component.html)
 * [typings.d.ts](https://codesandbox.io/s/gracious-diffie-7khcp3?file=/src/typings.d.ts)
 
-## 
+---------------------------------------------------------------------------------
 
 > Angular components for icons in digital and software products using the Carbon
 > Design System
