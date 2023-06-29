@@ -70,7 +70,7 @@
     "change-case": "3.0.2",
     "fs-extra": "7.0.1",
     "ng-packagr": "9.1.0",
-    "semantic-release": "17.2.3",
+    "semantic-release": "19.0.3",
     "typescript": "3.8.3",
     "zone.js": "0.10.3",
     "rollup": "2.3.3"
